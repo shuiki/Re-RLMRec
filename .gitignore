@@ -1,0 +1,10 @@
+data/data/steam
+data/data/yelp
+data/amazon/itm_emb_np.pkl
+data/amazon/itm_prf.pkl
+data/amazon/trn_mat.pkl
+data/amazon/tst_mat.pkl
+data/amazon/usr_emb_np.pkl
+data/amazon/usr_prf.pkl
+data/amazon/val_mat.pkl
+.idea
