@@ -37,8 +37,8 @@ class LightGCN_plus_contraAda(BaseModel):
         self.w_ii = nn.Parameter(t.tensor(0.008))
 
         # pos_samples for contrastive adapter
-        self.usr_pos_sample_idx = t.tensor(configs['usr_pos_samples_idx']).T[1]
-        self.itm_pos_sample_idx = t.tensor(configs['itm_pos_samples_idx']).T[1]
+        self.usr_pos_sample_idx = t.tensor(configs['usr_pos_samples_idx']).T[1].long()
+        self.itm_pos_sample_idx = t.tensor(configs['itm_pos_samples_idx']).T[1].long()
 
         self.mlp = nn.Sequential(
             nn.Linear(self.usrprf_embeds.shape[1], (self.usrprf_embeds.shape[1] + self.embedding_size) // 2),
