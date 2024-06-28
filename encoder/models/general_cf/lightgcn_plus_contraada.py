@@ -87,18 +87,19 @@ class LightGCN_plus_contraAda(BaseModel):
 
         usrprf_embeds = self.usrprf_embeds
         itmprf_embeds = self.itmprf_embeds
-        userprf_embeds_ori, posItemprf_embeds_ori, negItemprf_embeds_ori = self._pick_embeds(usrprf_embeds, itmprf_embeds, batch_data)
-
-        usr_pos_samples = usrprf_embeds[self.usr_pos_sample_idx]
-        itm_pos_samples = itmprf_embeds[self.itm_pos_sample_idx]
-        usr_match_samples,itm_pos_match_samples,itm_neg_match_samples = self._pick_embeds(usr_pos_samples,itm_pos_samples,batch_data)
-        uu_loss = self.w_uu * cal_infonce_loss(userprf_embeds_ori,usr_match_samples,usrprf_embeds,0.15)
-        ii_loss = self.w_ii * (cal_infonce_loss(posItemprf_embeds_ori, itm_pos_match_samples, itmprf_embeds, 0.15)+ \
-                  cal_infonce_loss(negItemprf_embeds_ori, itm_neg_match_samples, itmprf_embeds, 0.15))/2
+        # userprf_embeds_ori, posItemprf_embeds_ori, negItemprf_embeds_ori = self._pick_embeds(usrprf_embeds, itmprf_embeds, batch_data)
 
         usrprf_embeds = self.mlp(usrprf_embeds)
         itmprf_embeds = self.mlp(itmprf_embeds)
         ancprf_embeds, posprf_embeds, negprf_embeds = self._pick_embeds(usrprf_embeds, itmprf_embeds, batch_data)
+
+        usr_pos_samples = usrprf_embeds[self.usr_pos_sample_idx]
+        itm_pos_samples = itmprf_embeds[self.itm_pos_sample_idx]
+        usr_match_samples, itm_pos_match_samples, itm_neg_match_samples = self._pick_embeds(usr_pos_samples,
+                                                                                            itm_pos_samples, batch_data)
+        uu_loss = self.w_uu * cal_infonce_loss(ancprf_embeds, usr_match_samples, usrprf_embeds, 0.15)
+        ii_loss = self.w_ii * (cal_infonce_loss(posprf_embeds, itm_pos_match_samples, itmprf_embeds, 0.15) + \
+                               cal_infonce_loss(negprf_embeds, itm_neg_match_samples, itmprf_embeds, 0.15)) / 2
 
 
         bpr_loss = cal_bpr_loss(anc_embeds, pos_embeds, neg_embeds) / anc_embeds.shape[0]
