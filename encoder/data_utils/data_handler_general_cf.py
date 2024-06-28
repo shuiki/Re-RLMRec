@@ -22,6 +22,7 @@ class DataHandlerGeneralCF:
         self.tst_file = predir + 'tst_mat.pkl'
 
 
+
     def _load_one_mat(self, file):
         """Load one single adjacent matrix from file
 

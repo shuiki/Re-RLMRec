@@ -57,6 +57,14 @@ def parse_configure(model=None, dataset=None):
         with open(itmprf_embeds_path, 'rb') as f:
             configs['itmprf_embeds'] = pickle.load(f)
 
+        # adapter samples
+        usr_pos_samples_path = "./data/{}/usr_pos_samples.pkl".format(configs['data']['name'])
+        itm_pos_samples_path = "./data/{}/itm_pos_samples.pkl".format(configs['data']['name'])
+        with open(usr_pos_samples_path,'rb') as f:
+            configs['usr_pos_samples_idx'] = pickle.load(f)
+        with open(itm_pos_samples_path,'rb') as f:
+            configs['itm_pos_samples_idx'] = pickle.load(f)
+
         return configs
 
 configs = parse_configure()
