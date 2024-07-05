@@ -93,12 +93,12 @@ class LightGCN_plus_moe(BaseModel):
         #     nn.Linear((self.usrprf_embeds.shape[1] + self.embedding_size) // 2, self.embedding_size)
         # )
 
-        self._init_weight()
+        # self._init_weight()
 
-    def _init_weight(self):
-        for m in self.mlp:
-            if isinstance(m, nn.Linear):
-                init(m.weight)
+    # def _init_weight(self):
+    #     for m in self.mlp:
+    #         if isinstance(m, nn.Linear):
+    #             init(m.weight)
     
     def _propagate(self, adj, embeds):
         return t.spmm(adj, embeds)
