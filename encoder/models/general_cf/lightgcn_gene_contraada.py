@@ -28,6 +28,7 @@ class LightGCN_gene_contraAda(BaseModel):
         self.mask_ratio = self.hyper_config['mask_ratio']
         self.recon_weight = self.hyper_config['recon_weight']
         self.re_temperature = self.hyper_config['re_temperature']
+        self.kd_temperature = self.hyper_config['kd_temperature']
 
         # semantic-embeddings
         self.usrprf_embeds = nn.Parameter(t.tensor(configs['usrprf_embeds']).float())

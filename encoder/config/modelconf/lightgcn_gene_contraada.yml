@@ -34,6 +34,7 @@ model:
   mask_ratio: 0.1
   recon_weight: 1.0e-1
   re_temperature: 0.2
+  kd_temperature: 0.2
   # for amazon
   amazon:
     layer_num: 2
@@ -41,6 +42,7 @@ model:
     mask_ratio: 0.15
     recon_weight: 0.1
     re_temperature: 0.5
+    kd_temperature: 0.2
   # for yelp
   yelp:
     layer_num: 2
@@ -48,6 +50,7 @@ model:
     mask_ratio: 0.05
     recon_weight: 0.01
     re_temperature: 0.1
+    kd_temperature: 0.2
   # for steam:
   steam:
     layer_num: 2
@@ -55,5 +58,5 @@ model:
     mask_ratio: 0.15
     recon_weight: 0.1
     re_temperature: 0.5
-
+    kd_temperature: 0.2
 
