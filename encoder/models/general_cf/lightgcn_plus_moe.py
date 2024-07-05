@@ -64,8 +64,8 @@ class LightGCN_plus_moe(BaseModel):
 
         share_expt_num = configs['model']['share_expt_num']
         spcf_expt_num = configs['model']['spcf_expt_num']
-        expt_dim = configs['model']['expt_dim']
-
+        hidden_dim = configs['model']['hidden_dim']
+        dropout = configs['model']['dropout']
 
         self.user_embeds = nn.Parameter(init(t.empty(self.user_num, self.embedding_size)))
         self.item_embeds = nn.Parameter(init(t.empty(self.item_num, self.embedding_size)))
@@ -83,8 +83,9 @@ class LightGCN_plus_moe(BaseModel):
         self.usrprf_embeds = t.tensor(configs['usrprf_embeds']).float().cuda()
         self.itmprf_embeds = t.tensor(configs['itmprf_embeds']).float().cuda()
 
-        self.hea = HEA(share_expt_num, spcf_expt_num, expt_dim, 2, self.usrprf_embeds.shape[1], 0.3)
-        self.linear = nn.Linear(expt_dim, self.embedding_size)
+        self.hea = HEA(share_expt_num, spcf_expt_num, [hidden_dim,self.embedding_size], 2, self.usrprf_embeds.shape[1], dropout)
+        # self.hea = HEA(share_expt_num, spcf_expt_num, [(self.usrprf_embeds.shape[1] + self.embedding_size) // 2), self.embedding_size], 2, self.usrprf_embeds.shape[1],dropout)
+        # self.linear = nn.Linear(expt_dim, self.embedding_size)
 
         # self.mlp = nn.Sequential(
         #     nn.Linear(self.usrprf_embeds.shape[1], (self.usrprf_embeds.shape[1] + self.embedding_size) // 2),
@@ -134,8 +135,8 @@ class LightGCN_plus_moe(BaseModel):
         # usrprf_embeds = self.mlp(self.usrprf_embeds)
         # itmprf_embeds = self.mlp(self.itmprf_embeds)
         hea = self.hea([self.usrprf_embeds,self.itmprf_embeds])
-        usrprf_embeds = self.linear(hea[0])
-        itmprf_embeds = self.linear(hea[1])
+        usrprf_embeds = hea[0]
+        itmprf_embeds = hea[1]
 
         ancprf_embeds, posprf_embeds, negprf_embeds = self._pick_embeds(usrprf_embeds, itmprf_embeds, batch_data)
 
