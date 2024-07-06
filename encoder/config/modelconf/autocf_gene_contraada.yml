@@ -42,7 +42,7 @@ model:
   mask_ratio: 5.0e-2
   recon_weight: 1.0e-1
   re_temperature: 0.5
-  kd_temperature: 0.2
+  kd_temperature: 0.15
   # for amazon
   amazon:
     gcn_layer: 2

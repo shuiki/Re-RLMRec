@@ -46,8 +46,8 @@ class AutoCF_gene_contraAda(BaseModel):
         self.itmprf_embeds = nn.Parameter(t.tensor(configs['itmprf_embeds']).float())
 
         # weight params
-        self.w_uu = nn.Parameter(t.tensor(0.04))
-        self.w_ii = nn.Parameter(t.tensor(0.04))
+        self.w_uu = nn.Parameter(t.tensor(0.8))
+        self.w_ii = nn.Parameter(t.tensor(0.8))
 
         # pos_samples for contrastive adapter
         self.usr_pos_sample_idx = t.tensor(configs['usr_pos_samples_idx']).T[1].long()
@@ -56,9 +56,9 @@ class AutoCF_gene_contraAda(BaseModel):
         # generative process
         self.gene_masker = NodeMask(self.mask_ratio, self.embedding_size)
         self.mlp = nn.Sequential(
-            nn.Linear(self.embedding_size, (self.prf_embeds.shape[1] + self.embedding_size) // 2),
+            nn.Linear(self.embedding_size, (self.usrprf_embeds.shape[1] + self.embedding_size) // 2),
             nn.LeakyReLU(),
-            nn.Linear((self.prf_embeds.shape[1] + self.embedding_size) // 2, self.prf_embeds.shape[1])
+            nn.Linear((self.usrprf_embeds.shape[1] + self.embedding_size) // 2, self.usrprf_embeds.shape[1])
         )
 
         self._init_weight()
@@ -129,14 +129,15 @@ class AutoCF_gene_contraAda(BaseModel):
         itmprf_embeds = self.itmprf_embeds
         # userprf_embeds_ori, posItemprf_embeds_ori, negItemprf_embeds_ori = self._pick_embeds(usrprf_embeds, itmprf_embeds, batch_data)
 
-        usrprf_embeds = self.mlp(usrprf_embeds)
-        itmprf_embeds = self.mlp(itmprf_embeds)
+        # usrprf_embeds = self.mlp(usrprf_embeds)
+        # itmprf_embeds = self.mlp(itmprf_embeds)
 
         ancprf_embeds = usrprf_embeds[ancs]
         posprf_embeds = itmprf_embeds[poss]
 
         usr_pos_samples = usrprf_embeds[self.usr_pos_sample_idx]
         itm_pos_samples = itmprf_embeds[self.itm_pos_sample_idx]
+        # print("usr_pos_samples:",usr_pos_samples.shape)
         usr_match_samples = usr_pos_samples[ancs]
         itm_pos_match_samples = itm_pos_samples[poss]
 

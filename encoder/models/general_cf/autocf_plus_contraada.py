@@ -112,6 +112,8 @@ class AutoCF_plus_contraAda(BaseModel):
         usrprf_embeds = self.usrprf_embeds
         itmprf_embeds = self.itmprf_embeds
         # userprf_embeds_ori, posItemprf_embeds_ori, negItemprf_embeds_ori = self._pick_embeds(usrprf_embeds, itmprf_embeds, batch_data)
+        usrprf_embeds = self.mlp(usrprf_embeds)
+        itmprf_embeds = self.mlp(itmprf_embeds)
 
         ancprf_embeds = usrprf_embeds[ancs]
         posprf_embeds = itmprf_embeds[poss]
