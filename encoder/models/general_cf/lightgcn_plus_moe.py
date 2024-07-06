@@ -45,7 +45,7 @@ class HEA(nn.Module):
                                    for _ in range(task_num)])
 
     def forward(self, x_list,no_sharing = False,task_no=-1):
-        if no_sharing and task_no>0 and task_no <self.task_num:
+        if no_sharing and task_no>=0 and task_no <self.task_num:
             x = x_list[0] # (bs, input_dim)
             net = self.gate_net[task_no]
             gates = net(x) #(bs, expert_num)
@@ -99,7 +99,7 @@ class LightGCN_plus_moe(BaseModel):
         self.itmprf_embeds = t.tensor(configs['itmprf_embeds']).float().cuda()
 
         self.hea = HEA(share_expt_num, spcf_expt_num, [hidden_dim,self.embedding_size], 2, self.usrprf_embeds.shape[1], dropout)
-        # self.hea = HEA(share_expt_num, spcf_expt_num, [(self.usrprf_embeds.shape[1] + self.embedding_size) // 2), self.embedding_size], 2, self.usrprf_embeds.shape[1],dropout)
+        #self.hea = HEA(share_expt_num, spcf_expt_num, [((self.usrprf_embeds.shape[1] + self.embedding_size) // 2), hidden_dim, self.embedding_size], 2, self.usrprf_embeds.shape[1],dropout)
         # self.linear = nn.Linear(expt_dim, self.embedding_size)
 
         # self.mlp = nn.Sequential(
@@ -151,19 +151,19 @@ class LightGCN_plus_moe(BaseModel):
 
         ancprf_embeds, posprf_embeds, negprf_embeds = self._pick_embeds(self.usrprf_embeds, self.itmprf_embeds, batch_data)
 
-        shared_hea = self.hea.forward([ancprf_embeds,posprf_embeds])
+        # shared_hea = self.hea.forward([ancprf_embeds,posprf_embeds])
 
-        ancprf_embeds = shared_hea[0]
-        print("usrprf:",ancprf_embeds.shape)
-        posprf_embeds = shared_hea[1]
-        print("pos_itmprf:",posprf_embeds.shape)
+        ancprf_embeds = self.hea.forward([ancprf_embeds],no_sharing=True, task_no=0)
+        # print("usrprf:",ancprf_embeds.shape)
+        posprf_embeds = self.hea.forward([posprf_embeds],no_sharing=True,task_no=1)
+        # print("pos_itmprf:",posprf_embeds.shape)
         negprf_embeds = self.hea.forward([negprf_embeds], no_sharing=True, task_no=1)
-        usrprf_embeds = self.hea.forward([self.usrprf_embeds],no_sharing=True,task_no=0)[0]
+        usrprf_embeds = self.hea.forward([self.usrprf_embeds],no_sharing=True,task_no=0)
         itmprf_embeds = self.hea.forward([self.itmprf_embeds],no_sharing=True,task_no=1)
         
-        print("neg_itmprf:",negprf_embeds.shape)
-        print("all_usrprf:",usrprf_embeds.shape)
-        print("all_itmprf:",itmprf_embeds.shape)
+        # print("neg_itmprf:",negprf_embeds.shape)
+        # print("all_usrprf:",usrprf_embeds.shape)
+        # print("all_itmprf:",itmprf_embeds.shape)
 
         #print(type(usrprf_embeds))
         #print(usrprf_embeds.shape)
