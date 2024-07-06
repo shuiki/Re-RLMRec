@@ -49,11 +49,11 @@ class HEA(nn.Module):
             x = x_list[0] # (bs, input_dim)
             net = self.gate_net[task_no]
             gates = net(x) #(bs, expert_num)
-            gates = gates[:][self.share_expt_num:] #(bs, spfc_expert_num)
+            gates = gates[:,self.share_expt_num:] #(bs, spfc_expert_num)
             gates = nn.functional.softmax(gates,dim=-1).unsqueeze(dim=1) # (bs,1,spfc_expert_num)
             spcf_net = self.spcf_expt_net[task_no]
             spcf_res = t.stack([net(x) for net in spcf_net],dim=1) # (bs, spfcnum, E)
-            expert_mix = t.matmal(gates,spcf_res).squeeze(dim=1) #(bs, 1,E)
+            expert_mix = t.matmul(gates,spcf_res).squeeze(dim=1) #(bs, 1,E)
             return expert_mix
         gates = [net(x) for net, x in zip(self.gate_net, x_list)]
         gates = t.stack(gates, dim=1)  # (bs, tower_num, expert_num), export_num = share_expt_num + spcf_expt_num
@@ -154,10 +154,19 @@ class LightGCN_plus_moe(BaseModel):
         shared_hea = self.hea.forward([ancprf_embeds,posprf_embeds])
 
         ancprf_embeds = shared_hea[0]
+        print("usrprf:",ancprf_embeds.shape)
         posprf_embeds = shared_hea[1]
+        print("pos_itmprf:",posprf_embeds.shape)
         negprf_embeds = self.hea.forward([negprf_embeds], no_sharing=True, task_no=1)
-        usrprf_embeds = self.hea.forward([self.usrprf_embeds],no_sharing=True,task_no=0)
+        usrprf_embeds = self.hea.forward([self.usrprf_embeds],no_sharing=True,task_no=0)[0]
         itmprf_embeds = self.hea.forward([self.itmprf_embeds],no_sharing=True,task_no=1)
+        
+        print("neg_itmprf:",negprf_embeds.shape)
+        print("all_usrprf:",usrprf_embeds.shape)
+        print("all_itmprf:",itmprf_embeds.shape)
+
+        #print(type(usrprf_embeds))
+        #print(usrprf_embeds.shape)
 
         bpr_loss = cal_bpr_loss(anc_embeds, pos_embeds, neg_embeds) / anc_embeds.shape[0]
         reg_loss = self.reg_weight * reg_params(self)
