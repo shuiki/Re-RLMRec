@@ -33,13 +33,28 @@ class HEA(nn.Module):
     """
     def __init__(self, share_expt_num, spcf_expt_num, expt_dim, task_num, inp_dim, dropout):
         super(HEA, self).__init__()
+        self.share_expt_num = share_expt_num
+        self.spcf_expt_num = spcf_expt_num
+        self.task_num = task_num
+        self.inp_dim = inp_dim
+        self.expt_dim = expt_dim
         self.share_expt_net = nn.ModuleList([MLP(expt_dim, inp_dim, dropout) for _ in range(share_expt_num)])
         self.spcf_expt_net = nn.ModuleList([nn.ModuleList([MLP(expt_dim, inp_dim, dropout)
                                                            for _ in range(spcf_expt_num)]) for _ in range(task_num)])
         self.gate_net = nn.ModuleList([nn.Linear(inp_dim, share_expt_num + spcf_expt_num)
                                    for _ in range(task_num)])
 
-    def forward(self, x_list):
+    def forward(self, x_list,no_sharing = False,task_no=-1):
+        if no_sharing and task_no>0 and task_no <self.task_num:
+            x = x_list[0] # (bs, input_dim)
+            net = self.gate_net[task_no]
+            gates = net(x) #(bs, expert_num)
+            gates = gates[:][self.share_expt_num:] #(bs, spfc_expert_num)
+            gates = nn.functional.softmax(gates,dim=-1).unsqueeze(dim=1) # (bs,1,spfc_expert_num)
+            spcf_net = self.spcf_expt_net[task_no]
+            spcf_res = spcf_net(x) # (bs, spfcnum, E)
+            expert_mix = t.matmal(gates,spcf_res).squeeze(dim=1) #(bs, 1,E)
+            return expert_mix
         gates = [net(x) for net, x in zip(self.gate_net, x_list)]
         gates = t.stack(gates, dim=1)  # (bs, tower_num, expert_num), export_num = share_expt_num + spcf_expt_num
         gates = nn.functional.softmax(gates, dim=-1).unsqueeze(dim=2)  # (bs, tower_num, 1, expert_num)
@@ -132,20 +147,24 @@ class LightGCN_plus_moe(BaseModel):
 
         anc_embeds, pos_embeds, neg_embeds = self._pick_embeds(user_embeds, item_embeds, batch_data)
 
-        # usrprf_embeds = self.mlp(self.usrprf_embeds)
-        # itmprf_embeds = self.mlp(self.itmprf_embeds)
-        hea = self.hea([self.usrprf_embeds,self.itmprf_embeds])
-        usrprf_embeds = hea[0]
-        itmprf_embeds = hea[1]
 
-        ancprf_embeds, posprf_embeds, negprf_embeds = self._pick_embeds(usrprf_embeds, itmprf_embeds, batch_data)
+
+        ancprf_embeds, posprf_embeds, negprf_embeds = self._pick_embeds(self.usrprf_embeds, self.itmprf_embeds, batch_data)
+
+        shared_hea = self.hea.forward([ancprf_embeds,posprf_embeds])
+
+        ancprf_embeds = shared_hea[0]
+        posprf_embeds = shared_hea[1]
+        negprf_embeds = self.hea.forward([negprf_embeds], no_sharing=True, task_no=1)
+        usrprf_embeds = self.hea.forward([self.usrprf_embeds],no_sharing=True,task_no=0)
+        itmprf_embeds = self.hea.forward([self.itmprf_embeds],no_sharing=True,task_no=1)
 
         bpr_loss = cal_bpr_loss(anc_embeds, pos_embeds, neg_embeds) / anc_embeds.shape[0]
         reg_loss = self.reg_weight * reg_params(self)
 
         kd_loss = cal_infonce_loss(anc_embeds, ancprf_embeds, usrprf_embeds, self.kd_temperature) + \
-                  cal_infonce_loss(pos_embeds, posprf_embeds, posprf_embeds, self.kd_temperature) + \
-                  cal_infonce_loss(neg_embeds, negprf_embeds, negprf_embeds, self.kd_temperature)
+                  cal_infonce_loss(pos_embeds, posprf_embeds, itmprf_embeds, self.kd_temperature) + \
+                  cal_infonce_loss(neg_embeds, negprf_embeds, itmprf_embeds, self.kd_temperature)
         kd_loss /= anc_embeds.shape[0]
         kd_loss *= self.kd_weight
 
