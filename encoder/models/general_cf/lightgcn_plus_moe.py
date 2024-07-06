@@ -52,7 +52,7 @@ class HEA(nn.Module):
             gates = gates[:][self.share_expt_num:] #(bs, spfc_expert_num)
             gates = nn.functional.softmax(gates,dim=-1).unsqueeze(dim=1) # (bs,1,spfc_expert_num)
             spcf_net = self.spcf_expt_net[task_no]
-            spcf_res = spcf_net(x) # (bs, spfcnum, E)
+            spcf_res = t.stack([net(x) for net in spcf_net],dim=1) # (bs, spfcnum, E)
             expert_mix = t.matmal(gates,spcf_res).squeeze(dim=1) #(bs, 1,E)
             return expert_mix
         gates = [net(x) for net, x in zip(self.gate_net, x_list)]
