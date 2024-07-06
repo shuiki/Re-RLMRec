@@ -129,11 +129,11 @@ class AutoCF_gene_contraAda(BaseModel):
         itmprf_embeds = self.itmprf_embeds
         # userprf_embeds_ori, posItemprf_embeds_ori, negItemprf_embeds_ori = self._pick_embeds(usrprf_embeds, itmprf_embeds, batch_data)
 
-        ancprf_embeds = usrprf_embeds[ancs]
-        posprf_embeds = itmprf_embeds[poss]
-
         usrprf_embeds = self.mlp(usrprf_embeds)
         itmprf_embeds = self.mlp(itmprf_embeds)
+
+        ancprf_embeds = usrprf_embeds[ancs]
+        posprf_embeds = itmprf_embeds[poss]
 
         usr_pos_samples = usrprf_embeds[self.usr_pos_sample_idx]
         itm_pos_samples = itmprf_embeds[self.itm_pos_sample_idx]
