@@ -6,6 +6,10 @@ def cal_bpr_loss(anc_embeds, pos_embeds, neg_embeds):
     neg_preds = (anc_embeds * neg_embeds).sum(-1)
     return t.sum(F.softplus(neg_preds - pos_preds))
 
+def cal_bpr_loss_pos(anc_embeds, pos_embeds):
+    pos_preds = (anc_embeds * pos_embeds).sum(-1)
+    return t.sum(F.softplus(-pos_preds))
+
 def reg_pick_embeds(embeds_list):
     reg_loss = 0
     for embeds in embeds_list:
