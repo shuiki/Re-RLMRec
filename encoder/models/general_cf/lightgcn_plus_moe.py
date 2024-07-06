@@ -90,27 +90,27 @@ class LightGCN_plus_moe(BaseModel):
 
         ancprf_embeds, posprf_embeds, negprf_embeds = self._pick_embeds(self.usrprf_embeds, self.itmprf_embeds, batch_data)
 
-        shared_hea = self.hea.forward([ancprf_embeds,posprf_embeds])
-        ancprf_embeds = shared_hea[0]
-        posprf_embeds = shared_hea[1]
+        # shared_hea = self.hea.forward([ancprf_embeds,posprf_embeds])
+        # ancprf_embeds = shared_hea[0]
+        # posprf_embeds = shared_hea[1]
 
-        # ancprf_embeds = self.hea.forward([ancprf_embeds],no_sharing=True, task_no=0)
+        ancprf_embeds = self.hea.forward([ancprf_embeds],no_sharing=True, task_no=0)
 
-        # posprf_embeds = self.hea.forward([posprf_embeds],no_sharing=True,task_no=1)
+        posprf_embeds = self.hea.forward([posprf_embeds],no_sharing=True,task_no=1)
 
-        # negprf_embeds = self.hea.forward([negprf_embeds], no_sharing=True, task_no=1)
-        # usrprf_embeds = self.hea.forward([self.usrprf_embeds],no_sharing=True,task_no=0)
-        # itmprf_embeds = self.hea.forward([self.itmprf_embeds],no_sharing=True,task_no=1)
+        negprf_embeds = self.hea.forward([negprf_embeds], no_sharing=True, task_no=1)
+        usrprf_embeds = self.hea.forward([self.usrprf_embeds],no_sharing=True,task_no=0)
+        itmprf_embeds = self.hea.forward([self.itmprf_embeds],no_sharing=True,task_no=1)
 
         #print(type(usrprf_embeds))
         #print(usrprf_embeds.shape)
 
-        bpr_loss = cal_bpr_loss_pos(anc_embeds, pos_embeds) / anc_embeds.shape[0]
+        bpr_loss = cal_bpr_loss(anc_embeds, pos_embeds) / anc_embeds.shape[0]
         reg_loss = self.reg_weight * reg_params(self)
 
-        kd_loss = cal_infonce_loss(anc_embeds, ancprf_embeds, ancprf_embeds, self.kd_temperature) + \
-                  cal_infonce_loss(pos_embeds, posprf_embeds, posprf_embeds, self.kd_temperature)
-                  # + cal_infonce_loss(neg_embeds, negprf_embeds, negprf_embeds, self.kd_temperature)
+        kd_loss = cal_infonce_loss(anc_embeds, ancprf_embeds, usrprf_embeds, self.kd_temperature) + \
+                  cal_infonce_loss(pos_embeds, posprf_embeds, itmprf_embeds, self.kd_temperature)\
+                  + cal_infonce_loss(neg_embeds, negprf_embeds, itmprf_embeds, self.kd_temperature)
         kd_loss /= anc_embeds.shape[0]
         kd_loss *= self.kd_weight
 

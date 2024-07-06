@@ -132,6 +132,9 @@ class AutoCF_gene_contraAda(BaseModel):
         ancprf_embeds = usrprf_embeds[ancs]
         posprf_embeds = itmprf_embeds[poss]
 
+        usrprf_embeds = self.mlp(usrprf_embeds)
+        itmprf_embeds = self.mlp(itmprf_embeds)
+
         usr_pos_samples = usrprf_embeds[self.usr_pos_sample_idx]
         itm_pos_samples = itmprf_embeds[self.itm_pos_sample_idx]
         usr_match_samples = usr_pos_samples[ancs]
