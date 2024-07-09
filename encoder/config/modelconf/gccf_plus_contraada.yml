@@ -33,13 +33,13 @@ model:
   layer_num: 3
   reg_weight: 1.0e-6
   kd_weight: 1.0e-3
-  kd_temperature: 0.1
+  kd_temperature: 0.15
   # for amazon
   amazon:
     layer_num: 2
     reg_weight: 1.0e-6
     kd_weight: 1.0e-3
-    kd_temperature: 0.1
+    kd_temperature: 0.15
   # for yelp
   yelp:
     layer_num: 2

@@ -64,8 +64,8 @@ class DCCF_gene(BaseModel):
         self.itmprf_embeds = nn.Parameter(torch.tensor(configs['itmprf_embeds']).float())
 
         # weight params
-        self.w_uu = nn.Parameter(torch.tensor(0.8))
-        self.w_ii = nn.Parameter(torch.tensor(0.8))
+        self.w_uu = torch.tensor(0.0004)
+        self.w_ii = torch.tensor(0.0004)
 
         # pos_samples for contrastive adapter
         self.usr_pos_sample_idx = torch.tensor(configs['usr_pos_samples_idx']).T[1].long()

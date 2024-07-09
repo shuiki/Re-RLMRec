@@ -33,8 +33,8 @@ class LightGCN_plus_contraAda(BaseModel):
         self.itmprf_embeds = nn.Parameter(t.tensor(configs['itmprf_embeds']).float())
 
         # weight params
-        self.w_uu = nn.Parameter(t.tensor(0.04))
-        self.w_ii = nn.Parameter(t.tensor(0.04))
+        self.w_uu = t.tensor(0.0004)
+        self.w_ii = t.tensor(0.0004)
 
         # pos_samples for contrastive adapter
         self.usr_pos_sample_idx = t.tensor(configs['usr_pos_samples_idx']).T[1].long()

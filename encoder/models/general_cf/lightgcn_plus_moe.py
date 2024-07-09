@@ -105,7 +105,7 @@ class LightGCN_plus_moe(BaseModel):
         #print(type(usrprf_embeds))
         #print(usrprf_embeds.shape)
 
-        bpr_loss = cal_bpr_loss(anc_embeds, pos_embeds) / anc_embeds.shape[0]
+        bpr_loss = cal_bpr_loss(anc_embeds, pos_embeds,neg_embeds) / anc_embeds.shape[0]
         reg_loss = self.reg_weight * reg_params(self)
 
         kd_loss = cal_infonce_loss(anc_embeds, ancprf_embeds, usrprf_embeds, self.kd_temperature) + \

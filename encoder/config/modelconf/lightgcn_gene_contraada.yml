@@ -34,7 +34,7 @@ model:
   mask_ratio: 0.1
   recon_weight: 1.0e-1
   re_temperature: 0.2
-  kd_temperature: 0.2
+  kd_temperature: 0.15
   # for amazon
   amazon:
     layer_num: 2
