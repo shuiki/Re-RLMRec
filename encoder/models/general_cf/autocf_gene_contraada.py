@@ -154,7 +154,7 @@ class AutoCF_gene_contraAda(BaseModel):
         cl_loss = (self.contrast(ancs, user_embeds) + self.contrast(poss, item_embeds)) * self.ssl_reg + self.contrast(ancs, user_embeds, item_embeds)
         recon_loss = self.recon_weight * self._reconstruction(t.concat([user_embeds, item_embeds], axis=0), seeds)
         loss = rec_loss + reg_loss + cl_loss + recon_loss + uu_loss + ii_loss
-        losses = {'rec_loss': rec_loss, 'reg_loss': reg_loss, 'cl_loss': cl_loss, 'recon_loss': recon_loss}
+        losses = {'rec_loss': rec_loss, 'reg_loss': reg_loss, 'cl_loss': cl_loss, 'recon_loss': recon_loss,'uu_loss':uu_loss,'ii_loss':ii_loss}
         return loss, losses
     
     def full_predict(self, batch_data):

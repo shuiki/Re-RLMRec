@@ -137,7 +137,7 @@ class AutoCF_plus_contraAda(BaseModel):
         kd_loss *= self.kd_weight
 
         loss = rec_loss + reg_loss + cl_loss + kd_loss + ii_loss + uu_loss
-        losses = {'rec_loss': rec_loss, 'reg_loss': reg_loss, 'cl_loss': cl_loss, 'kd_loss': kd_loss}
+        losses = {'rec_loss': rec_loss, 'reg_loss': reg_loss, 'cl_loss': cl_loss, 'kd_loss': kd_loss,'uu_loss': uu_loss,'ii_loss': ii_loss}
         return loss, losses
     
     def full_predict(self, batch_data):
