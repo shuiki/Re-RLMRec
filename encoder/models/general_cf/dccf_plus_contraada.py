@@ -210,8 +210,8 @@ class DCCF_plus(BaseModel):
                     cal_infonce_loss(negprf_embeds, itm_neg_match_samples, itmprf_embeds, self.kd_temperature)) / 2
 
         kd_loss = cal_infonce_loss(anc_embeds, ancprf_embeds, usrprf_embeds, self.kd_temperature) + \
-                  cal_infonce_loss(pos_embeds, posprf_embeds, posprf_embeds, self.kd_temperature) + \
-                  cal_infonce_loss(neg_embeds, negprf_embeds, negprf_embeds, self.kd_temperature)
+                  cal_infonce_loss(pos_embeds, posprf_embeds, itmprf_embeds, self.kd_temperature) + \
+                  cal_infonce_loss(neg_embeds, negprf_embeds, itmprf_embeds, self.kd_temperature)
         kd_loss /= anc_embeds.shape[0]
         kd_loss *= self.kd_weight
 

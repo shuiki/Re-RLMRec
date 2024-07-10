@@ -119,8 +119,8 @@ class SGL_plus(LightGCN):
         cl_loss *= self.cl_weight
 
         kd_loss = cal_infonce_loss(anc_embeds3, ancprf_embeds, usrprf_embeds, self.kd_temperature) + \
-                  cal_infonce_loss(pos_embeds3, posprf_embeds, posprf_embeds, self.kd_temperature) + \
-                  cal_infonce_loss(neg_embeds3, negprf_embeds, negprf_embeds, self.kd_temperature)
+                  cal_infonce_loss(pos_embeds3, posprf_embeds, itmprf_embeds, self.kd_temperature) + \
+                  cal_infonce_loss(neg_embeds3, negprf_embeds, itmprf_embeds, self.kd_temperature)
         kd_loss /= anc_embeds3.shape[0]
         kd_loss *= self.kd_weight
 
