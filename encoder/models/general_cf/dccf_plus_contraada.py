@@ -69,16 +69,24 @@ class DCCF_plus(BaseModel):
         self.itm_pos_sample_idx = torch.tensor(configs['itm_pos_samples_idx']).T[1].long()
 
 
-        self.mlp = nn.Sequential(
+        self.mlp_u = nn.Sequential(
             nn.Linear(self.usrprf_embeds.shape[1], (self.usrprf_embeds.shape[1] + self.embedding_size) // 2),
             nn.LeakyReLU(),
             nn.Linear((self.usrprf_embeds.shape[1] + self.embedding_size) // 2, self.embedding_size)
         )
 
+        self.mlp_i = nn.Sequential(
+            nn.Linear(self.usrprf_embeds.shape[1], (self.usrprf_embeds.shape[1] + self.embedding_size) // 2),
+            nn.LeakyReLU(),
+            nn.Linear((self.usrprf_embeds.shape[1] + self.embedding_size) // 2, self.embedding_size)
+        )
         self._init_weight()
 
     def _init_weight(self):
-        for m in self.mlp:
+        for m in self.mlp_u:
+            if isinstance(m, nn.Linear):
+                init(m.weight)
+        for m in self.mlp_i:
             if isinstance(m, nn.Linear):
                 init(m.weight)
         init(self.user_embeds.weight)
@@ -196,8 +204,8 @@ class DCCF_plus(BaseModel):
         itmprf_embeds = self.itmprf_embeds
         # userprf_embeds_ori, posItemprf_embeds_ori, negItemprf_embeds_ori = self._pick_embeds(usrprf_embeds, itmprf_embeds, batch_data)
 
-        usrprf_embeds = self.mlp(usrprf_embeds)
-        itmprf_embeds = self.mlp(itmprf_embeds)
+        usrprf_embeds = self.mlp_u(usrprf_embeds)
+        itmprf_embeds = self.mlp_i(itmprf_embeds)
         ancprf_embeds, posprf_embeds, negprf_embeds = self._pick_embeds(usrprf_embeds, itmprf_embeds, batch_data)
 
         usr_pos_samples = usrprf_embeds[self.usr_pos_sample_idx]

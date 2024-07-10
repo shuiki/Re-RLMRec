@@ -43,16 +43,24 @@ class SimGCL_gene(LightGCN_gene):
 
         # generative process
         self.masker = NodeMask(self.mask_ratio, self.embedding_size)
-        self.mlp = nn.Sequential(
+        self.mlp_u = nn.Sequential(
             nn.Linear(self.embedding_size, (self.prf_embeds.shape[1] + self.embedding_size) // 2),
             nn.LeakyReLU(),
             nn.Linear((self.prf_embeds.shape[1] + self.embedding_size) // 2, self.prf_embeds.shape[1])
+        )
+        self.mlp_i = nn.Sequential(
+            nn.Linear(self.embedding_size, (self.usrprf_embeds.shape[1] + self.embedding_size) // 2),
+            nn.LeakyReLU(),
+            nn.Linear((self.usrprf_embeds.shape[1] + self.embedding_size) // 2, self.usrprf_embeds.shape[1])
         )
 
         self._init_weight()
 
     def _init_weight(self):
-        for m in self.mlp:
+        for m in self.mlp_u:
+            if isinstance(m, nn.Linear):
+                init(m.weight)
+        for m in self.mlp_i:
             if isinstance(m, nn.Linear):
                 init(m.weight)
 
@@ -91,10 +99,12 @@ class SimGCL_gene(LightGCN_gene):
         return anc_embeds, pos_embeds, neg_embeds
     
     def _reconstruction(self, embeds, seeds):
-        enc_embeds = embeds[seeds]
-        # prf_embeds = self.prf_embeds[seeds]
+        user_embeds = embeds[: self.user_num]
+        item_embeds = embeds[self.user_num:]
+        user_embeds = self.mlp_u(user_embeds)
+        item_embeds = self.mlp_i(item_embeds)
+        enc_embeds = t.concat([user_embeds, item_embeds], dim=0)[seeds]
         prf_embeds = t.concat([self.usrprf_embeds, self.itmprf_embeds], dim=0)[seeds]
-        enc_embeds = self.mlp(enc_embeds)
         recon_loss = ssl_con_loss(enc_embeds, prf_embeds, self.re_temperature)
         return recon_loss
 
